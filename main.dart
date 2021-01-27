@@ -1,86 +1,107 @@
-
-
 import 'package:flutter/material.dart';
-
-
-void main() => runApp(MyHomePage());
-
- class MyHomePage extends StatefulWidget {
-
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'mainPage.dart';
+void main() => runApp(MyApp());
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-     print('1st state');
- return _MyHomePageState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyLoginPage(),
+    );
   }
-
-
-      
- }
- 
- class _MyHomePageState extends State<MyHomePage> {
-
-
-   @override
-   void initState(){
-     print('3rd state');
-     super.initState();
-   }
-   @override
-   void didchangedependencies(){
-     print('4th state');
-     super.didChangeDependencies();
-   }
-
-
-
-   @override
-  void setState(fn) {
-    // TODO: implement
-     print('6th state');
-    super.setState(fn);
+}
+class MyLoginPage extends StatefulWidget {
+  @override
+  _MyLoginPageState createState() => _MyLoginPageState();
+}
+class _MyLoginPageState extends State<MyLoginPage> {
+  // Create a text controller and use it to retrieve the current value
+  // of the TextField.
+  final username_controller = TextEditingController();
+  final password_controller = TextEditingController();
+  SharedPreferences logindata;
+  bool newuser;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    check_if_already_login();
   }
-      @override
-      void deactive(){
-        print('7th state');
-        super.deactivate();
-      }
-          @override
-          void dispose(){
-              print('8th state');
-              super.dispose();
+  void check_if_already_login() async {
+    logindata = await SharedPreferences.getInstance();
+    newuser = (logindata.getBool('login') ?? true);
+    print(newuser);
+    if (newuser == false) {
+      Navigator.pushReplacement(
+          context, new MaterialPageRoute(builder: (context) => MyDashboard()));
+    }
+  }
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    username_controller.dispose();
+    password_controller.dispose();
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
 
-          }
-   @override
-   void didUpdateWidget(covariant MyHomePage oldWidget) {
-     print('5th state');
-     super.didUpdateWidget(oldWidget);
-   }
-   @override
-   Widget build(BuildContext context) {
+      ),
+      body: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              "Login Form",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
 
-        print(("2nd state"));
-     return MaterialApp(
-       home: Scaffold(
-         appBar: AppBar(
-           title: Text('Life Cycle Demo'),
-         ),
-         body: Column(
-           children: [
-             RaisedButton(onPressed: (){
-               deactive();
-               didchangedependencies();
-               setState(() { });
-               dispose();
-               },child: Text('Click'),),
-             Image.network('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6pqeL0PmncZu6B9ob5nPkFU_jmepJGA1DnQ&usqp=CAU',width: 250,height: 68,),
-             Text('Welcome'),
-             Text('hi')
-           ],
-         ),
-       ),
-     );
-   }
- }
- 
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: TextField(
+                controller: username_controller,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'username',
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: TextField(
+                controller: password_controller,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Password',
+                ),
+              ),
+            ),
+            RaisedButton(
+              textColor: Colors.white,
+              color: Colors.blue,
+              onPressed: () {
+                String username = username_controller.text;
+                String password = password_controller.text;
+                if (username != '' && password != '') {
+                  print('Successfull');
+                  logindata.setBool('login', false);
+                  logindata.setString('username', username);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MyDashboard()));
+                }
+              },
+              child: Text("Log-In"),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
